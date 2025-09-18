@@ -1,0 +1,387 @@
+'use client'
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, DollarSign, TrendingUp } from "lucide-react";
+import { Sidebar } from "../layout/Sidebar";
+import { TopBar } from "../layout/TopBar";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { ClienteModal } from "./ClienteModal";
+
+interface Cliente {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  status: 'Ativo' | 'Inativo';
+  dataUltimaCompra?: string;
+  totalCompras: number;
+}
+
+const mockClientes: Cliente[] = [
+  {
+    id: '1',
+    nome: 'João Silva',
+    email: 'joao.silva@email.com',
+    telefone: '(11) 99999-9999',
+    endereco: 'São Paulo, SP',
+    status: 'Ativo',
+    dataUltimaCompra: '2024-01-15',
+    totalCompras: 15420.50
+  },
+  {
+    id: '2',
+    nome: 'Maria Santos',
+    email: 'maria.santos@email.com',
+    telefone: '(11) 88888-8888',
+    endereco: 'Rio de Janeiro, RJ',
+    status: 'Ativo',
+    dataUltimaCompra: '2024-01-10',
+    totalCompras: 8750.00
+  },
+  {
+    id: '3',
+    nome: 'Pedro Oliveira',
+    email: 'pedro.oliveira@email.com',
+    telefone: '(11) 77777-7777',
+    endereco: 'Belo Horizonte, MG',
+    status: 'Inativo',
+    dataUltimaCompra: '2023-12-20',
+    totalCompras: 3200.00
+  },
+  {
+    id: '4',
+    nome: 'Ana Costa',
+    email: 'ana.costa@email.com',
+    telefone: '(11) 66666-6666',
+    endereco: 'Curitiba, PR',
+    status: 'Ativo',
+    dataUltimaCompra: '2024-01-12',
+    totalCompras: 12100.75
+  },
+  {
+    id: '5',
+    nome: 'Carlos Ferreira',
+    email: 'carlos.ferreira@email.com',
+    telefone: '(11) 55555-5555',
+    endereco: 'Porto Alegre, RS',
+    status: 'Ativo',
+    dataUltimaCompra: '2024-01-08',
+    totalCompras: 6890.25
+  }
+];
+
+export const ClientesPage = (): JSX.Element => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+
+  const handleMenuClick = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleSidebarClose = () => {
+    setSidebarOpen(false);
+  };
+
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleNewCliente = () => {
+    setEditingCliente(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditCliente = (cliente: Cliente) => {
+    setEditingCliente(cliente);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteCliente = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este cliente?')) {
+      setClientes(clientes.filter(c => c.id !== id));
+    }
+  };
+
+  const handleSaveCliente = (clienteData: Omit<Cliente, 'id'>) => {
+    if (editingCliente) {
+      // Editar cliente existente
+      setClientes(clientes.map(c => 
+        c.id === editingCliente.id 
+          ? { ...clienteData, id: editingCliente.id }
+          : c
+      ));
+    } else {
+      // Criar novo cliente
+      const newCliente: Cliente = {
+        ...clienteData,
+        id: Date.now().toString()
+      };
+      setClientes([...clientes, newCliente]);
+    }
+    setIsModalOpen(false);
+    setEditingCliente(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar 
+        activeTab="clientes" 
+        onTabChange={() => {}}
+        isOpen={sidebarOpen}
+        onClose={handleSidebarClose}
+      />
+      
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar onMenuClick={handleMenuClick} />
+        
+        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
+          >
+            {/* Header */}
+            <div className="flex flex-col gap-4">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Clientes</h1>
+                <p className="text-gray-500 mt-1">Gerencie seus clientes</p>
+              </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Clientes</p>
+                    <p className="text-2xl font-bold text-gray-900">{clientes.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Clientes Ativos</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {clientes.filter(c => c.status === 'Ativo').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Receita Total</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(clientes.reduce((sum, c) => sum + c.totalCompras, 0))}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(clientes.reduce((sum, c) => sum + c.totalCompras, 0) / clientes.length)}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Table Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              {/* Table Header */}
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Lista de Clientes</h3>
+                    <p className="text-sm text-gray-500">Gerencie todos os seus clientes</p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-initial">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="Buscar clientes..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-full sm:w-64"
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleNewCliente}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Cliente
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-gray-100">
+                      <TableHead className="font-semibold text-gray-700">Nome</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Email</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Telefone</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Endereço</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Total Compras</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Última Compra</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-center">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredClientes.map((cliente, index) => (
+                      <motion.tr
+                        key={cliente.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                      >
+                        <TableCell className="font-medium text-gray-900">
+                          {cliente.nome}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {cliente.email}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {cliente.telefone}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {cliente.endereco}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={cliente.status === 'Ativo' ? 'default' : 'secondary'}
+                            className={cliente.status === 'Ativo' 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                            }
+                          >
+                            {cliente.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium text-gray-900">
+                          {formatCurrency(cliente.totalCompras)}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {cliente.dataUltimaCompra ? formatDate(cliente.dataUltimaCompra) : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditCliente(cliente)}
+                              className="w-8 h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteCliente(cliente.id)}
+                              className="w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {filteredClientes.length === 0 && (
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Nenhum cliente encontrado
+                    </h3>
+                    <p className="text-gray-500">
+                      {searchTerm ? 'Tente ajustar sua busca' : 'Comece adicionando seu primeiro cliente'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </main>
+      </div>
+
+      {/* Modal */}
+      <ClienteModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCliente(null);
+        }}
+        onSave={handleSaveCliente}
+        cliente={editingCliente}
+      />
+    </div>
+  );
+};
