@@ -1,44 +1,35 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Phone, MapPin } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-
-interface Cliente {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  status: 'Ativo' | 'Inativo';
-  dataUltimaCompra?: string;
-  totalCompras: number;
-}
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, User, Mail, Phone, MapPin, IdCard } from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import CustomerDto from "@/dto/customer.dto";
 
 interface ClienteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (cliente: Omit<Cliente, 'id'>) => void;
-  cliente?: Cliente | null;
+  onSave: (cliente: CustomerDto) => void;
+  cliente?: CustomerDto | null;
 }
 
 export const ClienteModal: React.FC<ClienteModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  cliente
+  cliente,
 }) => {
   const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    telefone: '',
-    endereco: '',
-    status: 'Ativo' as 'Ativo' | 'Inativo',
+    name: "",
+    email: "",
+    phone: "",
+    /*  endereco: "", */
+    status: "Ativo" as "Ativo" | "Inativo",
     totalCompras: 0,
-    dataUltimaCompra: ''
+    dataUltimaCompra: "",
+    cpfCnpj: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,23 +37,25 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
   useEffect(() => {
     if (cliente) {
       setFormData({
-        nome: cliente.nome,
+        name: cliente.name,
         email: cliente.email,
-        telefone: cliente.telefone,
-        endereco: cliente.endereco,
+        phone: cliente.phone,
+        /*  endereco: cliente.endereco, */
         status: cliente.status,
         totalCompras: cliente.totalCompras,
-        dataUltimaCompra: cliente.dataUltimaCompra || ''
+        dataUltimaCompra: cliente.dataUltimaCompra || "",
+        cpfCnpj: cliente.cpfCnpj || "",
       });
     } else {
       setFormData({
-        nome: '',
-        email: '',
-        telefone: '',
-        endereco: '',
-        status: 'Ativo',
+        name: "",
+        email: "",
+        phone: "",
+        /* endereco: "", */
+        status: "Ativo",
         totalCompras: 0,
-        dataUltimaCompra: ''
+        dataUltimaCompra: "",
+        cpfCnpj: "",
       });
     }
     setErrors({});
@@ -71,23 +64,23 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório';
+    if (!formData.name.trim()) {
+      newErrors.nome = "Nome é obrigatório";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = "Email é obrigatório";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = "Email inválido";
     }
 
-    if (!formData.telefone.trim()) {
-      newErrors.telefone = 'Telefone é obrigatório';
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Telefone é obrigatório";
     }
 
-    if (!formData.endereco.trim()) {
-      newErrors.endereco = 'Endereço é obrigatório';
-    }
+    /*  if (!formData.endereco.trim()) {
+      newErrors.endereco = "Endereço é obrigatório";
+    } */
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -95,24 +88,27 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       onSave({
-        nome: formData.nome,
+        name: formData.name,
         email: formData.email,
-        telefone: formData.telefone,
-        endereco: formData.endereco,
+        phone: formData.phone,
         status: formData.status,
         totalCompras: formData.totalCompras,
-        dataUltimaCompra: formData.dataUltimaCompra || undefined
+        categoria: "",
+        cpfCnpj: formData.cpfCnpj,
+        idCustomers: "",
+        idCompany: 0,
+        supplier: false,
       });
     }
   };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -144,14 +140,16 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {cliente ? 'Editar Cliente' : 'Novo Cliente'}
+                      {cliente ? "Editar Cliente" : "Novo Cliente"}
                     </h2>
                     <p className="text-sm text-gray-500">
-                      {cliente ? 'Atualize as informações do cliente' : 'Preencha os dados do novo cliente'}
+                      {cliente
+                        ? "Atualize as informações do cliente"
+                        : "Preencha os dados do novo cliente"}
                     </p>
                   </div>
                 </div>
-                
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -167,7 +165,10 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Nome */}
                   <div className="space-y-2">
-                    <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="nome"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Nome Completo *
                     </Label>
                     <div className="relative">
@@ -175,20 +176,54 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                       <Input
                         id="nome"
                         type="text"
-                        value={formData.nome}
-                        onChange={(e) => handleInputChange('nome', e.target.value)}
-                        className={`pl-10 ${errors.nome ? 'border-red-500' : ''}`}
+                        value={formData.name}
+                        onChange={(e) =>
+                          handleInputChange("name", e.target.value)
+                        }
+                        className={`pl-10 ${
+                          errors.name ? "border-red-500" : ""
+                        }`}
                         placeholder="Digite o nome completo"
                       />
                     </div>
-                    {errors.nome && (
-                      <p className="text-sm text-red-600">{errors.nome}</p>
+                    {errors.name && (
+                      <p className="text-sm text-red-600">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="nome"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      CPF ou CNPJ *
+                    </Label>
+                    <div className="relative">
+                      <IdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        id="nome"
+                        type="text"
+                        value={formData.cpfCnpj}
+                        onChange={(e) =>
+                          handleInputChange("cpfCnpj", e.target.value)
+                        }
+                        className={`pl-10 ${
+                          errors.cpfCnpj ? "border-red-500" : ""
+                        }`}
+                        placeholder="Digite o cpf ou cnpj completo"
+                      />
+                    </div>
+                    {errors.cpfCnpj && (
+                      <p className="text-sm text-red-600">{errors.cpfCnpj}</p>
                     )}
                   </div>
 
                   {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Email *
                     </Label>
                     <div className="relative">
@@ -197,8 +232,12 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        className={`pl-10 ${
+                          errors.email ? "border-red-500" : ""
+                        }`}
                         placeholder="Digite o email"
                       />
                     </div>
@@ -209,7 +248,10 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
                   {/* Telefone */}
                   <div className="space-y-2">
-                    <Label htmlFor="telefone" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="telefone"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Telefone *
                     </Label>
                     <div className="relative">
@@ -217,26 +259,35 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                       <Input
                         id="telefone"
                         type="text"
-                        value={formData.telefone}
-                        onChange={(e) => handleInputChange('telefone', e.target.value)}
-                        className={`pl-10 ${errors.telefone ? 'border-red-500' : ''}`}
+                        value={formData.phone}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
+                        className={`pl-10 ${
+                          errors.phone ? "border-red-500" : ""
+                        }`}
                         placeholder="(11) 99999-9999"
                       />
                     </div>
-                    {errors.telefone && (
-                      <p className="text-sm text-red-600">{errors.telefone}</p>
+                    {errors.phone && (
+                      <p className="text-sm text-red-600">{errors.phone}</p>
                     )}
                   </div>
 
                   {/* Status */}
                   <div className="space-y-2">
-                    <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="status"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Status
                     </Label>
                     <select
                       id="status"
                       value={formData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("status", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Ativo">Ativo</option>
@@ -247,7 +298,10 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
                 {/* Endereço */}
                 <div className="space-y-2">
-                  <Label htmlFor="endereco" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="endereco"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Endereço *
                   </Label>
                   <div className="relative">
@@ -255,9 +309,13 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                     <Input
                       id="endereco"
                       type="text"
-                      value={formData.endereco}
-                      onChange={(e) => handleInputChange('endereco', e.target.value)}
-                      className={`pl-10 ${errors.endereco ? 'border-red-500' : ''}`}
+                      value={formData.email}
+                      onChange={(e) =>
+                        handleInputChange("endereco", e.target.value)
+                      }
+                      className={`pl-10 ${
+                        errors.endereco ? "border-red-500" : ""
+                      }`}
                       placeholder="Digite o endereço completo"
                     />
                   </div>
@@ -270,7 +328,10 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Total Compras */}
                     <div className="space-y-2">
-                      <Label htmlFor="totalCompras" className="text-sm font-medium text-gray-700">
+                      <Label
+                        htmlFor="totalCompras"
+                        className="text-sm font-medium text-gray-700"
+                      >
                         Total em Compras (R$)
                       </Label>
                       <Input
@@ -278,21 +339,31 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                         type="number"
                         step="0.01"
                         value={formData.totalCompras}
-                        onChange={(e) => handleInputChange('totalCompras', parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "totalCompras",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
                         placeholder="0.00"
                       />
                     </div>
 
                     {/* Data Última Compra */}
                     <div className="space-y-2">
-                      <Label htmlFor="dataUltimaCompra" className="text-sm font-medium text-gray-700">
+                      <Label
+                        htmlFor="dataUltimaCompra"
+                        className="text-sm font-medium text-gray-700"
+                      >
                         Data da Última Compra
                       </Label>
                       <Input
                         id="dataUltimaCompra"
                         type="date"
                         value={formData.dataUltimaCompra}
-                        onChange={(e) => handleInputChange('dataUltimaCompra', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("dataUltimaCompra", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -300,18 +371,14 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                  >
+                  <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
                     className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                   >
-                    {cliente ? 'Atualizar' : 'Salvar'}
+                    {cliente ? "Atualizar" : "Salvar"}
                   </Button>
                 </div>
               </form>
