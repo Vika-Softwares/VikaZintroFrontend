@@ -11,11 +11,11 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import { Sidebar } from "../layout/Sidebar";
-import { TopBar } from "../layout/TopBar";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -23,10 +23,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { ClienteModal } from "./ClienteModal";
+  TablePagination,
+} from "@/components/ui/table";
+import { ClienteModal } from "@/components/clientes/ClienteModal";
 import { ClientesApi } from "@/services/ClientesApi";
 import CustomerDto from "@/dto/customer.dto";
+import { useToast } from "@/contexts/ToastContext";
 
 export const ClientesPage = (): JSX.Element => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -38,15 +40,18 @@ export const ClientesPage = (): JSX.Element => {
   );
 
   const [totalClientes, setTotalClientes] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const clienteService = new ClientesApi();
+  const toast = useToast();
 
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         const data = await clienteService.getAll({
-          page: 1,
-          limit: 10,
+          page: currentPage,
+          limit: itemsPerPage,
           isSupplier: false,
         });
         setTotalClientes(data.total);
@@ -56,7 +61,7 @@ export const ClientesPage = (): JSX.Element => {
       }
     };
     fetchClientes();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   const handleMenuClick = () => {
     setSidebarOpen(!sidebarOpen);
@@ -71,6 +76,10 @@ export const ClientesPage = (): JSX.Element => {
       cliente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -94,31 +103,49 @@ export const ClientesPage = (): JSX.Element => {
   };
 
   const handleDeleteCliente = async (idCustomers: string) => {
-    if (confirm("Tem certeza que deseja excluir este cliente?")) {
-      await clienteService.deleteCliente(idCustomers);
-      setClientes(clientes.filter((c) => c.idCustomers !== idCustomers));
+    const confirmed = await toast.confirm({
+      title: "Excluir Cliente",
+      message: "Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.",
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
+      try {
+        await clienteService.deleteCliente(idCustomers);
+        setClientes(clientes.filter((c) => c.idCustomers !== idCustomers));
+        toast.success("Cliente excluído", "Cliente excluído com sucesso!");
+      } catch (error) {
+        toast.error("Erro ao excluir", "Não foi possível excluir o cliente.");
+      }
     }
   };
 
   const handleSaveCliente = async (clienteData: CustomerDto) => {
-    if (editingCliente) {
-      // Editar cliente existente
-      await clienteService.update(editingCliente.idCustomers, {
-        ...clienteData,
-        idCustomers: editingCliente.idCustomers,
-      });
-      setClientes(
-        clientes.map((c) =>
-          c.idCustomers === editingCliente.idCustomers
-            ? { ...clienteData, idCustomers: editingCliente.idCustomers }
-            : c
-        )
-      );
-    } else {
-      await clienteService.create(clienteData);
+    try {
+      if (editingCliente) {
+        await clienteService.update(editingCliente.idCustomers, {
+          ...clienteData,
+          idCustomers: editingCliente.idCustomers,
+        });
+        setClientes(
+          clientes.map((c) =>
+            c.idCustomers === editingCliente.idCustomers
+              ? { ...clienteData, idCustomers: editingCliente.idCustomers }
+              : c
+          )
+        );
+        toast.success("Cliente atualizado", "Dados do cliente atualizados com sucesso!");
+      } else {
+        await clienteService.create(clienteData);
+        toast.success("Cliente criado", "Novo cliente criado com sucesso!");
+      }
+      setIsModalOpen(false);
+      setEditingCliente(null);
+    } catch (error) {
+      toast.error("Erro ao salvar", "Não foi possível salvar o cliente.");
     }
-    setIsModalOpen(false);
-    setEditingCliente(null);
   };
 
   return (
@@ -140,7 +167,6 @@ export const ClientesPage = (): JSX.Element => {
             transition={{ duration: 0.3 }}
             className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
           >
-            {/* Header */}
             <div className="flex flex-col gap-4">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
@@ -150,7 +176,6 @@ export const ClientesPage = (): JSX.Element => {
               </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -246,9 +271,7 @@ export const ClientesPage = (): JSX.Element => {
               </motion.div>
             </div>
 
-            {/* Table Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-              {/* Table Header */}
               <div className="p-6 border-b border-gray-100">
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                   <div>
@@ -282,7 +305,6 @@ export const ClientesPage = (): JSX.Element => {
                 </div>
               </div>
 
-              {/* Table */}
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -399,12 +421,23 @@ export const ClientesPage = (): JSX.Element => {
                   </div>
                 )}
               </div>
+
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalClientes / itemsPerPage)}
+                totalItems={totalClientes}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(newSize) => {
+                  setItemsPerPage(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </motion.div>
         </main>
       </div>
 
-      {/* Modal */}
       <ClienteModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -417,3 +450,4 @@ export const ClientesPage = (): JSX.Element => {
     </div>
   );
 };
+

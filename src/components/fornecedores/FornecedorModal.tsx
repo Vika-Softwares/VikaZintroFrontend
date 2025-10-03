@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, Mail, Phone, MapPin, FileText, Tag } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, FileText, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Modal } from '@/components/ui/modal';
 
 interface Fornecedor {
   id: string;
@@ -146,53 +147,20 @@ export const FornecedorModal: React.FC<FornecedorModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
-          >
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {fornecedor ? 'Editar Fornecedor' : 'Novo Fornecedor'}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {fornecedor ? 'Atualize as informações do fornecedor' : 'Preencha os dados do novo fornecedor'}
-                    </p>
-                  </div>
-                </div>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                  className="w-10 h-10 rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={fornecedor ? 'Editar Fornecedor' : 'Novo Fornecedor'}
+      description={
+        fornecedor
+          ? 'Atualize as informações do fornecedor'
+          : 'Preencha os dados do novo fornecedor'
+      }
+      icon={<Building2 className="w-5 h-5 text-white" />}
+      iconBgColor="bg-gradient-to-br from-orange-500 to-red-600"
+      size="xl"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Nome */}
                   <div className="space-y-2">
@@ -284,18 +252,18 @@ export const FornecedorModal: React.FC<FornecedorModalProps> = ({
                       Categoria *
                     </Label>
                     <div className="relative">
-                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
+                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />
+                      <Select
                         id="categoria"
                         value={formData.categoria}
                         onChange={(e) => handleInputChange('categoria', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.categoria ? 'border-red-500' : ''}`}
+                        className={`pl-10 ${errors.categoria ? 'border-red-500' : ''}`}
                       >
                         <option value="">Selecione uma categoria</option>
                         {categorias.map(cat => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     {errors.categoria && (
                       <p className="text-sm text-red-600">{errors.categoria}</p>
@@ -307,15 +275,14 @@ export const FornecedorModal: React.FC<FornecedorModalProps> = ({
                     <Label htmlFor="status" className="text-sm font-medium text-gray-700">
                       Status
                     </Label>
-                    <select
+                    <Select
                       id="status"
                       value={formData.status}
                       onChange={(e) => handleInputChange('status', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Ativo">Ativo</option>
                       <option value="Inativo">Inativo</option>
-                    </select>
+                    </Select>
                   </div>
                 </div>
 
@@ -372,27 +339,23 @@ export const FornecedorModal: React.FC<FornecedorModalProps> = ({
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
-                  >
-                    {fornecedor ? 'Atualizar' : 'Salvar'}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+          >
+            {fornecedor ? 'Atualizar' : 'Salvar'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };

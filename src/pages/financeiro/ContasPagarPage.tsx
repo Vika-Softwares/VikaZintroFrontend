@@ -8,8 +8,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ContaPagarModal } from "./ContaPagarModal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TablePagination } from "@/components/ui/table";
+import { ContaPagarModal } from "@/components/financeiro/ContaPagarModal";
+import { useToast } from "@/contexts/ToastContext";
 
 interface ContaPagar {
   id: string;
@@ -73,6 +74,9 @@ export const ContasPagarPage = (): JSX.Element => {
   const [contas, setContas] = useState<ContaPagar[]>(mockContasPagar);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingConta, setEditingConta] = useState<ContaPagar | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const toast = useToast();
 
   const handleMenuClick = () => {
     setSidebarOpen(!sidebarOpen);
@@ -87,6 +91,15 @@ export const ContasPagarPage = (): JSX.Element => {
     conta.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conta.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalFiltered = filteredContas.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedContas = filteredContas.slice(startIndex, endIndex);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -131,9 +144,18 @@ export const ContasPagarPage = (): JSX.Element => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteConta = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta conta?')) {
+  const handleDeleteConta = async (id: string) => {
+    const confirmed = await toast.confirm({
+      title: "Excluir Conta",
+      message: "Tem certeza que deseja excluir esta conta a pagar? Esta ação não pode ser desfeita.",
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
       setContas(contas.filter(c => c.id !== id));
+      toast.success("Conta excluída", "Conta a pagar excluída com sucesso!");
     }
   };
 
@@ -144,12 +166,14 @@ export const ContasPagarPage = (): JSX.Element => {
           ? { ...contaData, id: editingConta.id }
           : c
       ));
+      toast.success("Conta atualizada", "Conta a pagar atualizada com sucesso!");
     } else {
       const newConta: ContaPagar = {
         ...contaData,
         id: Date.now().toString()
       };
       setContas([...contas, newConta]);
+      toast.success("Conta criada", "Nova conta a pagar criada com sucesso!");
     }
     setIsModalOpen(false);
     setEditingConta(null);
@@ -314,7 +338,7 @@ export const ContasPagarPage = (): JSX.Element => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredContas.map((conta, index) => (
+                    {paginatedContas.map((conta, index) => (
                       <motion.tr
                         key={conta.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -392,6 +416,18 @@ export const ContasPagarPage = (): JSX.Element => {
                   </div>
                 )}
               </div>
+
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalFiltered / itemsPerPage)}
+                totalItems={totalFiltered}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(newSize) => {
+                  setItemsPerPage(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </motion.div>
         </main>

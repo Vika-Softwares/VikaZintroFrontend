@@ -8,8 +8,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FornecedorModal } from "./FornecedorModal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TablePagination } from "@/components/ui/table";
+import { FornecedorModal } from "@/components/fornecedores/FornecedorModal";
+import { useToast } from "@/contexts/ToastContext";
 
 interface Fornecedor {
   id: string;
@@ -81,6 +82,9 @@ export const FornecedoresPage = (): JSX.Element => {
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>(mockFornecedores);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFornecedor, setEditingFornecedor] = useState<Fornecedor | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const toast = useToast();
 
   const handleMenuClick = () => {
     setSidebarOpen(!sidebarOpen);
@@ -95,6 +99,15 @@ export const FornecedoresPage = (): JSX.Element => {
     fornecedor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     fornecedor.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalFiltered = filteredFornecedores.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedFornecedores = filteredFornecedores.slice(startIndex, endIndex);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -121,27 +134,36 @@ export const FornecedoresPage = (): JSX.Element => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteFornecedor = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este fornecedor?')) {
+  const handleDeleteFornecedor = async (id: string) => {
+    const confirmed = await toast.confirm({
+      title: "Excluir Fornecedor",
+      message: "Tem certeza que deseja excluir este fornecedor? Esta ação não pode ser desfeita.",
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
       setFornecedores(fornecedores.filter(f => f.id !== id));
+      toast.success("Fornecedor excluído", "Fornecedor excluído com sucesso!");
     }
   };
 
   const handleSaveFornecedor = (fornecedorData: Omit<Fornecedor, 'id'>) => {
     if (editingFornecedor) {
-      // Editar fornecedor existente
       setFornecedores(fornecedores.map(f => 
         f.id === editingFornecedor.id 
           ? { ...fornecedorData, id: editingFornecedor.id }
           : f
       ));
+      toast.success("Fornecedor atualizado", "Dados do fornecedor atualizados com sucesso!");
     } else {
-      // Criar novo fornecedor
       const newFornecedor: Fornecedor = {
         ...fornecedorData,
         id: Date.now().toString()
       };
       setFornecedores([...fornecedores, newFornecedor]);
+      toast.success("Fornecedor criado", "Novo fornecedor criado com sucesso!");
     }
     setIsModalOpen(false);
     setEditingFornecedor(null);
@@ -298,7 +320,7 @@ export const FornecedoresPage = (): JSX.Element => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredFornecedores.map((fornecedor, index) => (
+                    {paginatedFornecedores.map((fornecedor, index) => (
                       <motion.tr
                         key={fornecedor.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -374,6 +396,18 @@ export const FornecedoresPage = (): JSX.Element => {
                   </div>
                 )}
               </div>
+
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalFiltered / itemsPerPage)}
+                totalItems={totalFiltered}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(newSize) => {
+                  setItemsPerPage(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </motion.div>
         </main>

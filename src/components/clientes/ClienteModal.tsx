@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Mail, Phone, MapPin, IdCard } from "lucide-react";
+import { User, Mail, Phone, MapPin, IdCard } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Select } from "../ui/select";
+import { Modal } from "../ui/modal";
 import CustomerDto from "@/dto/customer.dto";
 
 interface ClienteModalProps {
@@ -113,55 +114,20 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
-          >
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {cliente ? "Editar Cliente" : "Novo Cliente"}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {cliente
-                        ? "Atualize as informações do cliente"
-                        : "Preencha os dados do novo cliente"}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                  className="w-10 h-10 rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={cliente ? "Editar Cliente" : "Novo Cliente"}
+      description={
+        cliente
+          ? "Atualize as informações do cliente"
+          : "Preencha os dados do novo cliente"
+      }
+      icon={<User className="w-5 h-5 text-white" />}
+      iconBgColor="bg-gradient-to-br from-blue-500 to-purple-600"
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Nome */}
                   <div className="space-y-2">
@@ -282,17 +248,16 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                     >
                       Status
                     </Label>
-                    <select
+                    <Select
                       id="status"
                       value={formData.status}
                       onChange={(e) =>
                         handleInputChange("status", e.target.value)
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Ativo">Ativo</option>
                       <option value="Inativo">Inativo</option>
-                    </select>
+                    </Select>
                   </div>
                 </div>
 
@@ -369,23 +334,19 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-                  <Button type="button" variant="outline" onClick={onClose}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
-                  >
-                    {cliente ? "Atualizar" : "Salvar"}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+          >
+            {cliente ? "Atualizar" : "Salvar"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };

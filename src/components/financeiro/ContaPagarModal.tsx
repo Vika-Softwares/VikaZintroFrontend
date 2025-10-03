@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, DollarSign, Calendar, FileText, Building2, Tag, MessageSquare } from 'lucide-react';
+import { DollarSign, Calendar, FileText, Building2, Tag, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Modal } from '@/components/ui/modal';
 
 interface ContaPagar {
   id: string;
@@ -145,53 +148,20 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
-          >
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {conta ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {conta ? 'Atualize as informações da conta' : 'Preencha os dados da nova conta'}
-                    </p>
-                  </div>
-                </div>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                  className="w-10 h-10 rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={conta ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}
+      description={
+        conta
+          ? 'Atualize as informações da conta'
+          : 'Preencha os dados da nova conta'
+      }
+      icon={<DollarSign className="w-5 h-5 text-white" />}
+      iconBgColor="bg-gradient-to-br from-red-500 to-pink-600"
+      size="xl"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Descrição */}
                   <div className="md:col-span-2 space-y-2">
@@ -263,18 +233,18 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
                       Categoria *
                     </Label>
                     <div className="relative">
-                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
+                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />
+                      <Select
                         id="categoria"
                         value={formData.categoria}
                         onChange={(e) => handleInputChange('categoria', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.categoria ? 'border-red-500' : ''}`}
+                        className={`pl-10 ${errors.categoria ? 'border-red-500' : ''}`}
                       >
                         <option value="">Selecione uma categoria</option>
                         {categorias.map(cat => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     {errors.categoria && (
                       <p className="text-sm text-red-600">{errors.categoria}</p>
@@ -287,18 +257,18 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
                       Fornecedor *
                     </Label>
                     <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
+                      <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />
+                      <Select
                         id="fornecedor"
                         value={formData.fornecedor}
                         onChange={(e) => handleInputChange('fornecedor', e.target.value)}
-                        className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.fornecedor ? 'border-red-500' : ''}`}
+                        className={`pl-10 ${errors.fornecedor ? 'border-red-500' : ''}`}
                       >
                         <option value="">Selecione um fornecedor</option>
                         {fornecedores.map(forn => (
                           <option key={forn} value={forn}>{forn}</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     {errors.fornecedor && (
                       <p className="text-sm text-red-600">{errors.fornecedor}</p>
@@ -310,16 +280,15 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
                     <Label htmlFor="status" className="text-sm font-medium text-gray-700">
                       Status
                     </Label>
-                    <select
+                    <Select
                       id="status"
                       value={formData.status}
                       onChange={(e) => handleInputChange('status', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Pendente">Pendente</option>
                       <option value="Pago">Pago</option>
                       <option value="Vencido">Vencido</option>
-                    </select>
+                    </Select>
                   </div>
 
                   {/* Recorrente */}
@@ -327,18 +296,12 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
                     <Label className="text-sm font-medium text-gray-700">
                       Conta Recorrente
                     </Label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="recorrente"
-                        checked={formData.recorrente}
-                        onChange={(e) => handleInputChange('recorrente', e.target.checked)}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                      <Label htmlFor="recorrente" className="text-sm text-gray-600">
-                        Esta conta se repete mensalmente
-                      </Label>
-                    </div>
+                    <Checkbox
+                      id="recorrente"
+                      checked={formData.recorrente}
+                      onChange={(e) => handleInputChange('recorrente', e.target.checked)}
+                      label="Esta conta se repete mensalmente"
+                    />
                   </div>
                 </div>
 
@@ -348,39 +311,35 @@ export const ContaPagarModal: React.FC<ContaPagarModalProps> = ({
                     Observações
                   </Label>
                   <div className="relative">
-                    <MessageSquare className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
-                    <textarea
+                    <MessageSquare className="absolute left-3 top-3 text-gray-400 w-4 h-4 pointer-events-none z-10" />
+                    <Textarea
                       id="observacoes"
                       value={formData.observacoes}
                       onChange={(e) => handleInputChange('observacoes', e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      className="pl-10"
                       rows={3}
                       placeholder="Observações adicionais sobre a conta"
                     />
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white"
-                  >
-                    {conta ? 'Atualizar' : 'Salvar'}
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white"
+          >
+            {conta ? 'Atualizar' : 'Salvar'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };

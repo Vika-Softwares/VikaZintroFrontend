@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sidebar } from "../layout/Sidebar";
-import { TopBar } from "../layout/TopBar";
-import { ExpenseCategorySection } from "../../screens/Frame/sections/ExpenseCategorySection/ExpenseCategorySection";
-import { FinancialOverviewSection } from "../../screens/Frame/sections/FinancialOverviewSection/FinancialOverviewSection";
-import { RecentTransactionsSection } from "../../screens/Frame/sections/RecentTransactionsSection/RecentTransactionsSection";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
-import { useFinancialData } from "../../hooks/useFinancialData";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
+import { ExpenseCategorySection } from "@/screens/Frame/sections/ExpenseCategorySection/ExpenseCategorySection";
+import { FinancialOverviewSection } from "@/screens/Frame/sections/FinancialOverviewSection/FinancialOverviewSection";
+import { RecentTransactionsSection } from "@/screens/Frame/sections/RecentTransactionsSection/RecentTransactionsSection";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useFinancialData } from "@/hooks/useFinancialData";
 
 export const DashboardClient = (): JSX.Element => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

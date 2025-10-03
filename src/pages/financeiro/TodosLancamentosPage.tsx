@@ -8,7 +8,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TablePagination } from "@/components/ui/table";
 
 interface Lancamento {
   id: string;
@@ -99,6 +99,8 @@ export const TodosLancamentosPage = (): JSX.Element => {
   const [filtroTipo, setFiltroTipo] = useState<'Todos' | 'Pagar' | 'Receber'>('Todos');
   const [filtroStatus, setFiltroStatus] = useState<'Todos' | 'Pendente' | 'Pago' | 'Recebido' | 'Vencido'>('Todos');
   const [lancamentos] = useState<Lancamento[]>(mockLancamentos);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Filtro por mês atual (padrão)
   const mesAtual = new Date().getMonth() + 1;
@@ -112,7 +114,7 @@ export const TodosLancamentosPage = (): JSX.Element => {
     setSidebarOpen(false);
   };
 
-  const filteredLancamentos = lancamentos.filter(lancamento => {
+  const allFilteredLancamentos = lancamentos.filter(lancamento => {
     const dataVenc = new Date(lancamento.dataVencimento);
     const mesLancamento = dataVenc.getMonth() + 1;
     const anoLancamento = dataVenc.getFullYear();
@@ -176,17 +178,26 @@ export const TodosLancamentosPage = (): JSX.Element => {
   };
 
   // Cálculos para os cards
-  const totalPagar = filteredLancamentos
+  const totalFiltered = allFilteredLancamentos.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const filteredLancamentos = allFilteredLancamentos.slice(startIndex, endIndex);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filtroTipo, filtroStatus]);
+
+  const totalPagar = allFilteredLancamentos
     .filter(l => l.tipo === 'Pagar')
     .reduce((sum, l) => sum + l.valor, 0);
 
-  const totalReceber = filteredLancamentos
+  const totalReceber = allFilteredLancamentos
     .filter(l => l.tipo === 'Receber')
     .reduce((sum, l) => sum + l.valor, 0);
 
   const saldoLiquido = totalReceber - totalPagar;
 
-  const totalVencidos = filteredLancamentos
+  const totalVencidos = allFilteredLancamentos
     .filter(l => l.status === 'Vencido')
     .reduce((sum, l) => sum + l.valor, 0);
 
@@ -352,7 +363,7 @@ export const TodosLancamentosPage = (): JSX.Element => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">Lançamentos do Mês</h3>
-                    <p className="text-sm text-gray-500">{filteredLancamentos.length} lançamentos encontrados</p>
+                    <p className="text-sm text-gray-500">{totalFiltered} lançamentos encontrados</p>
                   </div>
                 </div>
               </div>
@@ -431,7 +442,7 @@ export const TodosLancamentosPage = (): JSX.Element => {
                   </TableBody>
                 </Table>
 
-                {filteredLancamentos.length === 0 && (
+                {totalFiltered === 0 && (
                   <div className="text-center py-12">
                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -443,6 +454,18 @@ export const TodosLancamentosPage = (): JSX.Element => {
                   </div>
                 )}
               </div>
+
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalFiltered / itemsPerPage)}
+                totalItems={totalFiltered}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(newSize) => {
+                  setItemsPerPage(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </motion.div>
         </main>

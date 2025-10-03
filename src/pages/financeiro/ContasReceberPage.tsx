@@ -8,8 +8,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ContaReceberModal } from "./ContaReceberModal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TablePagination } from "@/components/ui/table";
+import { ContaReceberModal } from "@/components/financeiro/ContaReceberModal";
+import { useToast } from "@/contexts/ToastContext";
 
 interface ContaReceber {
   id: string;
@@ -73,6 +74,9 @@ export const ContasReceberPage = (): JSX.Element => {
   const [contas, setContas] = useState<ContaReceber[]>(mockContasReceber);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingConta, setEditingConta] = useState<ContaReceber | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const toast = useToast();
 
   const handleMenuClick = () => {
     setSidebarOpen(!sidebarOpen);
@@ -87,6 +91,15 @@ export const ContasReceberPage = (): JSX.Element => {
     conta.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conta.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalFiltered = filteredContas.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedContas = filteredContas.slice(startIndex, endIndex);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -131,9 +144,18 @@ export const ContasReceberPage = (): JSX.Element => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteConta = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta conta?')) {
+  const handleDeleteConta = async (id: string) => {
+    const confirmed = await toast.confirm({
+      title: "Excluir Conta",
+      message: "Tem certeza que deseja excluir esta conta a receber? Esta ação não pode ser desfeita.",
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
       setContas(contas.filter(c => c.id !== id));
+      toast.success("Conta excluída", "Conta a receber excluída com sucesso!");
     }
   };
 
@@ -144,12 +166,14 @@ export const ContasReceberPage = (): JSX.Element => {
           ? { ...contaData, id: editingConta.id }
           : c
       ));
+      toast.success("Conta atualizada", "Conta a receber atualizada com sucesso!");
     } else {
       const newConta: ContaReceber = {
         ...contaData,
         id: Date.now().toString()
       };
       setContas([...contas, newConta]);
+      toast.success("Conta criada", "Nova conta a receber criada com sucesso!");
     }
     setIsModalOpen(false);
     setEditingConta(null);
@@ -314,7 +338,7 @@ export const ContasReceberPage = (): JSX.Element => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredContas.map((conta, index) => (
+                    {paginatedContas.map((conta, index) => (
                       <motion.tr
                         key={conta.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -392,6 +416,18 @@ export const ContasReceberPage = (): JSX.Element => {
                   </div>
                 )}
               </div>
+
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalFiltered / itemsPerPage)}
+                totalItems={totalFiltered}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(newSize) => {
+                  setItemsPerPage(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </motion.div>
         </main>
