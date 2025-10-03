@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ToastProvider } from './contexts/ToastContext'
+import { LoginPage } from './pages/auth/LoginPage'
 import { DashboardClient } from './pages/dashboard/DashboardClient'
 import { ClientesPage } from './pages/clientes/ClientesPage'
 import { FornecedoresPage } from './pages/fornecedores/FornecedoresPage'
@@ -12,6 +13,7 @@ function App() {
   return (
     <ToastProvider>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<DashboardClient />} />
         <Route path="/clientes" element={<ClientesPage />} />
         <Route path="/fornecedores" element={<FornecedoresPage />} />
