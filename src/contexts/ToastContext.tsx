@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { Toast, ToastContainer, ToastType, ToastProps } from "@/components/ui/toast";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { Toast, ToastContainer, ToastType } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface ToastOptions {
@@ -110,6 +110,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setConfirmState((prev) => ({ ...prev, isOpen: false }));
   }, [confirmState]);
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { title, message } = (customEvent.detail || {}) as { title?: string; message?: string };
+      error(title || "Erro", message);
+    };
+    window.addEventListener("apiError", handler);
+    return () => {
+      window.removeEventListener("apiError", handler);
+    };
+  }, [error]);
+
   return (
     <ToastContext.Provider
       value={{
@@ -122,7 +134,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       {children}
-      
+
       <ToastContainer>
         {toasts.map((toast) => (
           <Toast
@@ -158,4 +170,3 @@ export const useToast = () => {
   }
   return context;
 };
-

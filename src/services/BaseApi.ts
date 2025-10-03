@@ -1,5 +1,5 @@
-// services/BaseApi.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export class BaseApi {
@@ -8,6 +8,25 @@ export class BaseApi {
   constructor() {
     console.log("API URL:", apiUrl);
     this.api = axios.create({ baseURL: apiUrl });
+
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const message =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Erro desconhecido ao comunicar com o backend.";
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("apiError", {
+              detail: { title: "Erro", message },
+            })
+          );
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
