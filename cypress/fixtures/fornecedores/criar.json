@@ -1,0 +1,13 @@
+{
+  "id": "4",
+  "nome": "Nova Logística Ltda",
+  "email": "contato@novalogistica.com",
+  "telefone": "(11) 6666-6666",
+  "endereco": "Guarulhos, SP",
+  "cnpj": "55.666.777/0001-88",
+  "status": "Ativo",
+  "categoria": "Logística",
+  "totalCompras": 0,
+  "dataUltimaCompra": ""
+}
+

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "1",
+    "nome": "Tech Solutions Ltda",
+    "email": "contato@techsolutions.com",
+    "telefone": "(11) 3333-3333",
+    "endereco": "São Paulo, SP",
+    "cnpj": "12.345.678/0001-90",
+    "status": "Ativo",
+    "categoria": "Tecnologia",
+    "dataUltimaCompra": "2024-01-12",
+    "totalCompras": 45200.0
+  },
+  {
+    "id": "2",
+    "nome": "Materiais & Cia",
+    "email": "vendas@materiaisecia.com",
+    "telefone": "(11) 4444-4444",
+    "endereco": "Campinas, SP",
+    "cnpj": "98.765.432/0001-10",
+    "status": "Ativo",
+    "categoria": "Materiais",
+    "dataUltimaCompra": "2024-01-08",
+    "totalCompras": 32500.0
+  },
+  {
+    "id": "3",
+    "nome": "Serviços Express",
+    "email": "contato@servicosexpress.com",
+    "telefone": "(11) 5555-5555",
+    "endereco": "Santos, SP",
+    "cnpj": "11.222.333/0001-44",
+    "status": "Inativo",
+    "categoria": "Serviços",
+    "dataUltimaCompra": "2023-12-15",
+    "totalCompras": 18900.0
+  }
+]
+

@@ -105,7 +105,8 @@ export const ClientesPage = (): JSX.Element => {
   const handleDeleteCliente = async (idCustomers: string) => {
     const confirmed = await toast.confirm({
       title: "Excluir Cliente",
-      message: "Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.",
+      message:
+        "Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.",
       confirmText: "Excluir",
       cancelText: "Cancelar",
       variant: "danger",
@@ -129,18 +130,23 @@ export const ClientesPage = (): JSX.Element => {
           ...clienteData,
           idCustomers: editingCliente.idCustomers,
         });
-        setClientes(
-          clientes.map((c) =>
-            c.idCustomers === editingCliente.idCustomers
-              ? { ...clienteData, idCustomers: editingCliente.idCustomers }
-              : c
-          )
+        toast.success(
+          "Cliente atualizado",
+          "Dados do cliente atualizados com sucesso!"
         );
-        toast.success("Cliente atualizado", "Dados do cliente atualizados com sucesso!");
       } else {
         await clienteService.create(clienteData);
         toast.success("Cliente criado", "Novo cliente criado com sucesso!");
       }
+
+      const data = await clienteService.getAll({
+        page: currentPage,
+        limit: itemsPerPage,
+        isSupplier: false,
+      });
+      setTotalClientes(data.total);
+      setClientes(data.data);
+
       setIsModalOpen(false);
       setEditingCliente(null);
     } catch (error) {
@@ -319,9 +325,6 @@ export const ClientesPage = (): JSX.Element => {
                         Telefone
                       </TableHead>
                       <TableHead className="font-semibold text-gray-700">
-                        Endereço
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
                         Status
                       </TableHead>
                       <TableHead className="font-semibold text-gray-700">
@@ -352,9 +355,6 @@ export const ClientesPage = (): JSX.Element => {
                         </TableCell>
                         <TableCell className="text-gray-600">
                           {cliente.phone}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {cliente.email}
                         </TableCell>
                         <TableCell>
                           <Badge
@@ -450,4 +450,3 @@ export const ClientesPage = (): JSX.Element => {
     </div>
   );
 };
-

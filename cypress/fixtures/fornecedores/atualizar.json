@@ -1,0 +1,13 @@
+{
+  "id": "1",
+  "nome": "Tech Solutions Ltda - Atualizado",
+  "email": "novo@techsolutions.com",
+  "telefone": "(11) 2222-2222",
+  "endereco": "São Paulo, SP - Centro",
+  "cnpj": "12.345.678/0001-90",
+  "status": "Ativo",
+  "categoria": "Tecnologia",
+  "dataUltimaCompra": "2024-01-12",
+  "totalCompras": 45200.0
+}
+

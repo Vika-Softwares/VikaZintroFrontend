@@ -1,13 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, MapPin, IdCard } from "lucide-react";
+import { User, Mail, Phone, IdCard } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { Modal } from "../ui/modal";
 import CustomerDto from "@/dto/customer.dto";
+import {
+  formatCPF,
+  formatPhone,
+  validateCPF,
+  validatePhone,
+} from "@/utils/formatters";
 
 interface ClienteModalProps {
   isOpen: boolean;
@@ -26,7 +32,6 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
     name: "",
     email: "",
     phone: "",
-    /*  endereco: "", */
     status: "Ativo" as "Ativo" | "Inativo",
     totalCompras: 0,
     dataUltimaCompra: "",
@@ -41,7 +46,6 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
         name: cliente.name,
         email: cliente.email,
         phone: cliente.phone,
-        /*  endereco: cliente.endereco, */
         status: cliente.status,
         totalCompras: cliente.totalCompras,
         dataUltimaCompra: cliente.dataUltimaCompra || "",
@@ -52,7 +56,6 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
         name: "",
         email: "",
         phone: "",
-        /* endereco: "", */
         status: "Ativo",
         totalCompras: 0,
         dataUltimaCompra: "",
@@ -66,7 +69,13 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.nome = "Nome é obrigatório";
+      newErrors.name = "Nome é obrigatório";
+    }
+
+    if (!formData.cpfCnpj.trim()) {
+      newErrors.cpfCnpj = "CPF ou CNPJ é obrigatório";
+    } else if (!validateCPF(formData.cpfCnpj)) {
+      newErrors.cpfCnpj = "CPF ou CNPJ inválido";
     }
 
     if (!formData.email.trim()) {
@@ -77,11 +86,9 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
     if (!formData.phone.trim()) {
       newErrors.phone = "Telefone é obrigatório";
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = "Telefone inválido";
     }
-
-    /*  if (!formData.endereco.trim()) {
-      newErrors.endereco = "Endereço é obrigatório";
-    } */
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -113,6 +120,22 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
     }
   };
 
+  const handleCPFChange = (value: string) => {
+    const formatted = formatCPF(value);
+    setFormData((prev) => ({ ...prev, cpfCnpj: formatted }));
+    if (errors.cpfCnpj) {
+      setErrors((prev) => ({ ...prev, cpfCnpj: "" }));
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhone(value);
+    setFormData((prev) => ({ ...prev, phone: formatted }));
+    if (errors.phone) {
+      setErrors((prev) => ({ ...prev, phone: "" }));
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -128,211 +151,161 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Nome */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="nome"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Nome Completo *
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="nome"
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          handleInputChange("name", e.target.value)
-                        }
-                        className={`pl-10 ${
-                          errors.name ? "border-red-500" : ""
-                        }`}
-                        placeholder="Digite o nome completo"
-                      />
-                    </div>
-                    {errors.name && (
-                      <p className="text-sm text-red-600">{errors.name}</p>
-                    )}
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Nome */}
+          <div className="space-y-2">
+            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
+              Nome Completo *
+            </Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="nome"
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                className={`pl-10 ${errors.name ? "border-red-500" : ""}`}
+                placeholder="Digite o nome completo"
+              />
+            </div>
+            {errors.name && (
+              <p className="text-sm text-red-600">{errors.name}</p>
+            )}
+          </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="nome"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      CPF ou CNPJ *
-                    </Label>
-                    <div className="relative">
-                      <IdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="nome"
-                        type="text"
-                        value={formData.cpfCnpj}
-                        onChange={(e) =>
-                          handleInputChange("cpfCnpj", e.target.value)
-                        }
-                        className={`pl-10 ${
-                          errors.cpfCnpj ? "border-red-500" : ""
-                        }`}
-                        placeholder="Digite o cpf ou cnpj completo"
-                      />
-                    </div>
-                    {errors.cpfCnpj && (
-                      <p className="text-sm text-red-600">{errors.cpfCnpj}</p>
-                    )}
-                  </div>
+          <div className="space-y-2">
+            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
+              CPF ou CNPJ *
+            </Label>
+            <div className="relative">
+              <IdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="cpfCnpj"
+                type="text"
+                value={formData.cpfCnpj}
+                onChange={(e) => handleCPFChange(e.target.value)}
+                className={`pl-10 ${errors.cpfCnpj ? "border-red-500" : ""}`}
+                placeholder="Digite o CPF ou CNPJ"
+              />
+            </div>
+            {errors.cpfCnpj && (
+              <p className="text-sm text-red-600">{errors.cpfCnpj}</p>
+            )}
+          </div>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Email *
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className={`pl-10 ${
-                          errors.email ? "border-red-500" : ""
-                        }`}
-                        placeholder="Digite o email"
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="text-sm text-red-600">{errors.email}</p>
-                    )}
-                  </div>
+          {/* Email */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-700"
+            >
+              Email *
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
+                placeholder="Digite o email"
+              />
+            </div>
+            {errors.email && (
+              <p className="text-sm text-red-600">{errors.email}</p>
+            )}
+          </div>
 
-                  {/* Telefone */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="telefone"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Telefone *
-                    </Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="telefone"
-                        type="text"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        className={`pl-10 ${
-                          errors.phone ? "border-red-500" : ""
-                        }`}
-                        placeholder="(11) 99999-9999"
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-sm text-red-600">{errors.phone}</p>
-                    )}
-                  </div>
+          {/* Telefone */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="telefone"
+              className="text-sm font-medium text-gray-700"
+            >
+              Telefone *
+            </Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="telefone"
+                type="text"
+                value={formData.phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+            {errors.phone && (
+              <p className="text-sm text-red-600">{errors.phone}</p>
+            )}
+          </div>
 
-                  {/* Status */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="status"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Status
-                    </Label>
-                    <Select
-                      id="status"
-                      value={formData.status}
-                      onChange={(e) =>
-                        handleInputChange("status", e.target.value)
-                      }
-                    >
-                      <option value="Ativo">Ativo</option>
-                      <option value="Inativo">Inativo</option>
-                    </Select>
-                  </div>
-                </div>
+          {/* Status */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="status"
+              className="text-sm font-medium text-gray-700"
+            >
+              Status
+            </Label>
+            <Select
+              id="status"
+              value={formData.status}
+              onChange={(e) => handleInputChange("status", e.target.value)}
+            >
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </Select>
+          </div>
+        </div>
 
-                {/* Endereço */}
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="endereco"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Endereço *
-                  </Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="endereco"
-                      type="text"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("endereco", e.target.value)
-                      }
-                      className={`pl-10 ${
-                        errors.endereco ? "border-red-500" : ""
-                      }`}
-                      placeholder="Digite o endereço completo"
-                    />
-                  </div>
-                  {errors.endereco && (
-                    <p className="text-sm text-red-600">{errors.endereco}</p>
-                  )}
-                </div>
+        {cliente && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Total Compras */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="totalCompras"
+                className="text-sm font-medium text-gray-700"
+              >
+                Total em Compras (R$)
+              </Label>
+              <Input
+                id="totalCompras"
+                type="number"
+                step="0.01"
+                value={formData.totalCompras}
+                onChange={(e) =>
+                  handleInputChange(
+                    "totalCompras",
+                    parseFloat(e.target.value) || 0
+                  )
+                }
+                placeholder="0.00"
+                disabled={!!cliente}
+              />
+            </div>
 
-                {cliente && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Total Compras */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="totalCompras"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Total em Compras (R$)
-                      </Label>
-                      <Input
-                        id="totalCompras"
-                        type="number"
-                        step="0.01"
-                        value={formData.totalCompras}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "totalCompras",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                        placeholder="0.00"
-                      />
-                    </div>
-
-                    {/* Data Última Compra */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="dataUltimaCompra"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Data da Última Compra
-                      </Label>
-                      <Input
-                        id="dataUltimaCompra"
-                        type="date"
-                        value={formData.dataUltimaCompra}
-                        onChange={(e) =>
-                          handleInputChange("dataUltimaCompra", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
+            {/* Data Última Compra */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="dataUltimaCompra"
+                className="text-sm font-medium text-gray-700"
+              >
+                Data da Última Compra
+              </Label>
+              <Input
+                id="dataUltimaCompra"
+                type="date"
+                value={formData.dataUltimaCompra}
+                onChange={(e) =>
+                  handleInputChange("dataUltimaCompra", e.target.value)
+                }
+                disabled={!!cliente}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">

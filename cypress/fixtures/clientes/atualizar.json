@@ -1,0 +1,11 @@
+{
+  "idCustomers": "1",
+  "name": "João Silva Atualizado",
+  "email": "joao.silva.novo@email.com",
+  "phone": "(11) 95555-5555",
+  "cpfCnpj": "123.456.789-01",
+  "status": "Ativo",
+  "totalCompras": 5000.0,
+  "dataUltimaCompra": "2024-01-15"
+}
+

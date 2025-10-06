@@ -2,11 +2,17 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 export const LoginPage = (): JSX.Element => {
   const [usuario, setUsuario] = useState("");
@@ -33,7 +39,7 @@ export const LoginPage = (): JSX.Element => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       console.log("Login:", { usuario, password });
     }
@@ -50,35 +56,39 @@ export const LoginPage = (): JSX.Element => {
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-4 pb-6">
             <div className="flex justify-center">
-              <img 
-                src="/logo.png" 
-                alt="Vika Zyntro" 
-                className="h-16 w-auto"
-              />
+              <img src="/logo.png" alt="Vika Zyntro" className="h-20 w-auto" />
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Bem vindo</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Bem vindo
+            </CardTitle>
             <CardDescription className="text-center">
               Digite suas credenciais para acessar o sistema
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="usuario" className="text-sm font-medium text-gray-700">
+                <Label
+                  htmlFor="usuario"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Usuário
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     id="usuario"
                     type="text"
                     value={usuario}
                     onChange={(e) => {
                       setUsuario(e.target.value);
-                      if (errors.usuario) setErrors((prev) => ({ ...prev, usuario: "" }));
+                      if (errors.usuario)
+                        setErrors((prev) => ({ ...prev, usuario: "" }));
                     }}
-                    className={`pl-10 ${errors.usuario ? "border-red-500" : ""}`}
+                    className={`pl-10 ${
+                      errors.usuario ? "border-red-500" : ""
+                    }`}
                     placeholder="Digite seu usuário"
                   />
                 </div>
@@ -88,7 +98,10 @@ export const LoginPage = (): JSX.Element => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Senha
                 </Label>
                 <div className="relative">
@@ -99,9 +112,12 @@ export const LoginPage = (): JSX.Element => {
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+                      if (errors.password)
+                        setErrors((prev) => ({ ...prev, password: "" }));
                     }}
-                    className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
+                    className={`pl-10 pr-10 ${
+                      errors.password ? "border-red-500" : ""
+                    }`}
                     placeholder="••••••••"
                   />
                   <button
@@ -138,4 +154,3 @@ export const LoginPage = (): JSX.Element => {
     </div>
   );
 };
-
