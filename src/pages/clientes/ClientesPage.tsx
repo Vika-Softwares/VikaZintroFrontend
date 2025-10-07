@@ -293,6 +293,7 @@ export const ClientesPage = (): JSX.Element => {
                     <div className="relative flex-1 sm:flex-initial">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
+                        data-testid="input-busca-clientes"
                         placeholder="Buscar clientes..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -301,6 +302,7 @@ export const ClientesPage = (): JSX.Element => {
                     </div>
 
                     <Button
+                      data-testid="btn-novo-cliente"
                       onClick={handleNewCliente}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                     >
@@ -312,7 +314,7 @@ export const ClientesPage = (): JSX.Element => {
               </div>
 
               <div className="overflow-x-auto">
-                <Table>
+                <Table data-testid="tabela-clientes">
                   <TableHeader>
                     <TableRow className="border-b border-gray-100">
                       <TableHead className="font-semibold text-gray-700">
@@ -342,6 +344,7 @@ export const ClientesPage = (): JSX.Element => {
                     {filteredClientes.map((cliente, index) => (
                       <motion.tr
                         key={cliente.idCustomers}
+                        data-testid="linha-cliente"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
@@ -383,6 +386,7 @@ export const ClientesPage = (): JSX.Element => {
                         <TableCell>
                           <div className="flex items-center justify-center gap-2">
                             <Button
+                              data-testid="btn-editar-cliente"
                               variant="ghost"
                               size="icon"
                               onClick={() => handleEditCliente(cliente)}
@@ -391,6 +395,7 @@ export const ClientesPage = (): JSX.Element => {
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
+                              data-testid="btn-excluir-cliente"
                               variant="ghost"
                               size="icon"
                               onClick={() =>

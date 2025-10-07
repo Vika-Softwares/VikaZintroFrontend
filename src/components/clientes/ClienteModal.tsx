@@ -138,6 +138,7 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
   return (
     <Modal
+      data-testid="modal-cliente"
       isOpen={isOpen}
       onClose={onClose}
       title={cliente ? "Editar Cliente" : "Novo Cliente"}
@@ -309,10 +310,11 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button data-testid="btn-cancelar-cliente" type="button" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
           <Button
+            data-testid="btn-salvar-cliente"
             type="submit"
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
           >

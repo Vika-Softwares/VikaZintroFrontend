@@ -1,4 +1,4 @@
-npmexport const mockFornecedoresList = [
+export const mockFornecedoresList = [
   {
     id: '1',
     nome: 'Tech Solutions Ltda',

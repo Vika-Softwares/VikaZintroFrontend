@@ -87,10 +87,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 </div>
 
                 <div className="flex items-center justify-end gap-3 mt-6">
-                  <Button variant="outline" onClick={onCancel}>
+                  <Button data-testid="btn-cancelar-exclusao" variant="outline" onClick={onCancel}>
                     {cancelText}
                   </Button>
                   <Button
+                    data-testid="btn-confirmar-exclusao"
                     onClick={onConfirm}
                     className={cn("text-white", config.confirmClass)}
                   >

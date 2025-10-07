@@ -73,8 +73,9 @@ export const Toast: React.FC<ToastProps> = ({
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "flex items-start gap-3 p-4 rounded-lg border shadow-lg min-w-[320px] max-w-[420px]",
-        config.bgColor
+        "flex items-start gap-3 p-4 rounded-lg border shadow-lg min-w-[320px] max-w-[420px] toast",
+        config.bgColor,
+        `toast-${type}`
       )}
     >
       <Icon className={cn("w-5 h-5 flex-shrink-0 mt-0.5", config.iconColor)} />

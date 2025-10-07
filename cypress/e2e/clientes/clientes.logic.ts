@@ -117,18 +117,76 @@ export class ClientesPageLogic {
   }
 
   static configurarInterceptadores(): void {
-    cy.intercept("GET", "**/api/customers*", {
-      fixture: "clientes/lista.json",
+    cy.intercept("GET", "**/customer*", {
+      statusCode: 200,
+      body: {
+        data: [
+          {
+            "idCustomers": "1",
+            "name": "João Silva",
+            "email": "joao.silva@email.com",
+            "phone": "(11) 99999-9999",
+            "cpfCnpj": "123.456.789-01",
+            "status": "Ativo",
+            "totalCompras": 5000.0,
+            "dataUltimaCompra": "2024-01-15"
+          },
+          {
+            "idCustomers": "2",
+            "name": "Maria Santos",
+            "email": "maria.santos@email.com",
+            "phone": "(11) 98888-8888",
+            "cpfCnpj": "987.654.321-00",
+            "status": "Ativo",
+            "totalCompras": 3200.0,
+            "dataUltimaCompra": "2024-01-10"
+          },
+          {
+            "idCustomers": "3",
+            "name": "Empresa Tech Ltda",
+            "email": "contato@empresatech.com",
+            "phone": "(11) 97777-7777",
+            "cpfCnpj": "12.345.678/0001-90",
+            "status": "Inativo",
+            "totalCompras": 15000.0,
+            "dataUltimaCompra": "2023-12-20"
+          }
+        ],
+        total: 3
+      }
     }).as("getClientes");
-    cy.intercept("POST", "**/api/customers", {
-      fixture: "clientes/criar.json",
+    
+    cy.intercept("POST", "**/customer", {
+      statusCode: 201,
+      body: {
+        "idCustomers": "4",
+        "name": "Carlos Oliveira",
+        "email": "carlos.oliveira@email.com",
+        "phone": "(11) 96666-6666",
+        "cpfCnpj": "111.222.333-44",
+        "status": "Ativo",
+        "totalCompras": 0,
+        "dataUltimaCompra": ""
+      }
     }).as("createCliente");
-    cy.intercept("PUT", "**/api/customers/*", {
-      fixture: "clientes/atualizar.json",
+    
+    cy.intercept("PUT", "**/customer/*", {
+      statusCode: 200,
+      body: {
+        "idCustomers": "1",
+        "name": "João Silva Atualizado",
+        "email": "joao.silva.novo@email.com",
+        "phone": "(11) 95555-5555",
+        "cpfCnpj": "123.456.789-01",
+        "status": "Ativo",
+        "totalCompras": 5000.0,
+        "dataUltimaCompra": "2024-01-15"
+      }
     }).as("updateCliente");
-    cy.intercept("DELETE", "**/api/customers/*", { statusCode: 204 }).as(
-      "deleteCliente"
-    );
+    
+    cy.intercept("DELETE", "**/customer/*", { 
+      statusCode: 204 
+    }).as("deleteCliente");
   }
 
   static aguardarRequisicao(alias: string): void {

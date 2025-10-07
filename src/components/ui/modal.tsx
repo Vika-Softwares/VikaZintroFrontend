@@ -13,6 +13,7 @@ interface ModalProps {
   iconBgColor?: string;
   children: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
+  "data-testid"?: string;
 }
 
 const sizeClasses = {
@@ -31,6 +32,7 @@ export const Modal: React.FC<ModalProps> = ({
   iconBgColor = "bg-gradient-to-br from-blue-500 to-purple-600",
   children,
   size = "lg",
+  "data-testid": dataTestId,
 }) => {
   return (
     <AnimatePresence>
@@ -44,6 +46,7 @@ export const Modal: React.FC<ModalProps> = ({
             className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
           >
             <motion.div
+              data-testid={dataTestId}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
