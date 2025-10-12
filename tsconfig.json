@@ -26,11 +26,12 @@
     "module": "ESNext"
   },
   "include": [
-    "src",
-    "**/*.ts",
-    "**/*.tsx"
+    "src"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "cypress",
+    "dist",
+    "build"
   ]
 }

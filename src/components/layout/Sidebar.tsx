@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
                       <span className="font-medium flex-1">{item.label}</span>
                       {isItemExpanded ? (
                         <ChevronDown className="w-4 h-4 flex-shrink-0" />
@@ -163,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
                         whileHover={{ x: isActive ? 0 : 4 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
                         <span className="font-medium">{item.label}</span>
                         {isActive && (
                           <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0" />
@@ -195,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
                                 whileHover={{ x: isSubActive ? 0 : 2 }}
                                 whileTap={{ scale: 0.98 }}
                               >
-                                <SubIcon className="w-4 h-4 flex-shrink-0" />
+                                {SubIcon && <SubIcon className="w-4 h-4 flex-shrink-0" />}
                                 <span className="font-medium text-sm">{subItem.label}</span>
                               </motion.div>
                             </Link>
