@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
@@ -27,7 +25,7 @@ interface SidebarProps {
 }
 
 const navigationItems: NavigationItem[] = [
-  { id: "dashboard", label: "Dashboard", path: "/", icon: LayoutDashboard },
+  { id: "dashboard", label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { 
     id: "cadastros", 
     label: "Cadastros", 
@@ -56,7 +54,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
   const location = useLocation();
   
   const getActiveTab = () => {
-    if (location.pathname === '/') return 'dashboard';
+    if (location.pathname === '/dashboard') return 'dashboard';
+    if (location.pathname === '/cadastros') return 'cadastros';
     if (location.pathname === '/clientes') return 'clientes';
     if (location.pathname === '/fornecedores') return 'fornecedores';
     if (location.pathname === '/todos-lancamentos') return 'todos-lancamentos';
@@ -68,7 +67,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
   
   const currentActiveTab = getActiveTab();
 
-  // Auto-expand parent menus based on current active tab
   React.useEffect(() => {
     const activeTab = getActiveTab();
     if (activeTab === 'clientes' || activeTab === 'fornecedores') {
@@ -93,7 +91,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
 
   return (
     <>
-      {/* Mobile Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -106,7 +103,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <motion.aside
         className={`
           fixed lg:static top-0 left-0 z-50 lg:z-auto
@@ -117,13 +113,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between px-6 py-8 border-b border-gray-100">
           <div className="flex items-center gap-4">
-            <img src="/logo (1).png" alt="Vika Zyntro"/>
+            <img src="/logo_zyntro.png" alt="Vika Zyntro"/>
           </div>
-          
-          {/* Close button for mobile */}
           <button
             onClick={onClose}
             className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -131,8 +124,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-
-        {/* Navigation */}
         <nav className="px-4 py-6 flex-1">
           <div className="space-y-2">
             {navigationItems.map((item) => {
@@ -144,7 +135,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
               
               return (
                 <div key={item.id}>
-                  {/* Main Item */}
                   {hasSubItems ? (
                     <button
                       onClick={() => toggleExpanded(item.id)}
@@ -181,8 +171,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
                       </motion.div>
                     </Link>
                   )}
-
-                  {/* Sub Items */}
                   <AnimatePresence>
                     {hasSubItems && isItemExpanded && (
                       <motion.div
@@ -221,8 +209,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
             })}
           </div>
         </nav>
-
-        {/* Settings */}
         <div className="px-4 pb-6">
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
             <Settings className="w-5 h-5 flex-shrink-0" />

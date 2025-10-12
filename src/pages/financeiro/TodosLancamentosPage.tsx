@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Calendar, DollarSign, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, Filter } from "lucide-react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +93,6 @@ const mockLancamentos: Lancamento[] = [
 ];
 
 export const TodosLancamentosPage = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'Todos' | 'Pagar' | 'Receber'>('Todos');
   const [filtroStatus, setFiltroStatus] = useState<'Todos' | 'Pendente' | 'Pago' | 'Recebido' | 'Vencido'>('Todos');
@@ -106,13 +104,6 @@ export const TodosLancamentosPage = (): JSX.Element => {
   const mesAtual = new Date().getMonth() + 1;
   const anoAtual = new Date().getFullYear();
 
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   const allFilteredLancamentos = lancamentos.filter(lancamento => {
     const dataVenc = new Date(lancamento.dataVencimento);
@@ -210,16 +201,8 @@ export const TodosLancamentosPage = (): JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeTab="todos-lancamentos" 
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
-      
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar title="Todos Lançamentos" />
         
         <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
@@ -468,8 +451,7 @@ export const TodosLancamentosPage = (): JSX.Element => {
               />
             </div>
           </motion.div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 };

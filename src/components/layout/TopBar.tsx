@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Menu } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
 
 interface TopBarProps {
-  onMenuClick: () => void;
+  title?: string;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
+export const TopBar: React.FC<TopBarProps> = ({ title = "Dashboard" }) => {
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -18,14 +18,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
       className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 flex-shrink-0"
     >
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onMenuClick}
-          className="lg:hidden"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
+        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
       </div>
 
       <div className="flex items-center gap-4">

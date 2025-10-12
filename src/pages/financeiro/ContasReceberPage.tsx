@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, DollarSign, Calendar, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +68,6 @@ const mockContasReceber: ContaReceber[] = [
 ];
 
 export const ContasReceberPage = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [contas, setContas] = useState<ContaReceber[]>(mockContasReceber);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,13 +76,6 @@ export const ContasReceberPage = (): JSX.Element => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const toast = useToast();
 
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   const filteredContas = contas.filter(conta =>
     conta.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -194,16 +185,8 @@ export const ContasReceberPage = (): JSX.Element => {
   const contasRecorrentes = contas.filter(c => c.recorrente).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeTab="contas-receber" 
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
-      
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar title="Contas a Receber" />
         
         <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
@@ -430,9 +413,8 @@ export const ContasReceberPage = (): JSX.Element => {
               />
             </div>
           </motion.div>
-        </main>
-      </div>
-
+      </main>
+      
       {/* Modal */}
       <ContaReceberModal
         isOpen={isModalOpen}

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, Building2, DollarSign, TrendingUp } from "lucide-react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,7 +76,6 @@ const mockFornecedores: Fornecedor[] = [
 ];
 
 export const FornecedoresPage = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>(mockFornecedores);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,13 +84,6 @@ export const FornecedoresPage = (): JSX.Element => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const toast = useToast();
 
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   const filteredFornecedores = fornecedores.filter(fornecedor =>
     fornecedor.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -170,16 +161,8 @@ export const FornecedoresPage = (): JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeTab="fornecedores" 
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
-      
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar title="Fornecedores" />
         
         <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
@@ -410,9 +393,8 @@ export const FornecedoresPage = (): JSX.Element => {
               />
             </div>
           </motion.div>
-        </main>
-      </div>
-
+      </main>
+      
       {/* Modal */}
       <FornecedorModal
         isOpen={isModalOpen}

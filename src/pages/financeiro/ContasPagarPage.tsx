@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Edit, Trash2, DollarSign, Calendar, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +68,6 @@ const mockContasPagar: ContaPagar[] = [
 ];
 
 export const ContasPagarPage = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [contas, setContas] = useState<ContaPagar[]>(mockContasPagar);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,14 +75,6 @@ export const ContasPagarPage = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const toast = useToast();
-
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   const filteredContas = contas.filter(conta =>
     conta.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -194,18 +184,10 @@ export const ContasPagarPage = (): JSX.Element => {
   const contasRecorrentes = contas.filter(c => c.recorrente).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeTab="contas-pagar" 
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar title="Contas a Pagar" />
       
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
-        
-        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+      <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -430,9 +412,8 @@ export const ContasPagarPage = (): JSX.Element => {
               />
             </div>
           </motion.div>
-        </main>
-      </div>
-
+      </main>
+      
       {/* Modal */}
       <ContaPagarModal
         isOpen={isModalOpen}

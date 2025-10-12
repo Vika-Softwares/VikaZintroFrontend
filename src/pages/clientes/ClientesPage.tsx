@@ -11,7 +11,6 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +30,6 @@ import CustomerDto from "@/dto/customer.dto";
 import { useToast } from "@/contexts/ToastContext";
 
 export const ClientesPage = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState<CustomerDto[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,13 +61,6 @@ export const ClientesPage = (): JSX.Element => {
     fetchClientes();
   }, [currentPage, itemsPerPage]);
 
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   const filteredClientes = clientes.filter(
     (cliente) =>
@@ -155,16 +146,8 @@ export const ClientesPage = (): JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar
-        activeTab="clientes"
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
-
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar title="Clientes" />
 
         <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
@@ -440,8 +423,7 @@ export const ClientesPage = (): JSX.Element => {
               />
             </div>
           </motion.div>
-        </main>
-      </div>
+      </main>
 
       <ClienteModal
         isOpen={isModalOpen}

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { ExpenseCategorySection } from "@/screens/Frame/sections/ExpenseCategorySection/ExpenseCategorySection";
 import { FinancialOverviewSection } from "@/screens/Frame/sections/FinancialOverviewSection/FinancialOverviewSection";
@@ -11,16 +10,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useFinancialData } from "@/hooks/useFinancialData";
 
 export const DashboardClient = (): JSX.Element => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { transactions, financialData, cashFlowData, expenseCategories, loading } = useFinancialData();
-
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
 
   if (loading || !financialData) {
     return (
@@ -34,18 +24,10 @@ export const DashboardClient = (): JSX.Element => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeTab="dashboard" 
-        onTabChange={() => {}}
-        isOpen={sidebarOpen}
-        onClose={handleSidebarClose}
-      />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <TopBar />
       
-      <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuClick={handleMenuClick} />
-        
-        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+      <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,8 +65,7 @@ export const DashboardClient = (): JSX.Element => {
             />
             <RecentTransactionsSection transactions={transactions} />
           </motion.div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 };

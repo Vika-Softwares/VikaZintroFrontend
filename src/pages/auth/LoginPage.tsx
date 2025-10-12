@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff, User } from "lucide-react";
@@ -13,12 +11,18 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const LoginPage = (): JSX.Element => {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -37,11 +41,35 @@ export const LoginPage = (): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
 
-    if (validateForm()) {
-      console.log("Login:", { usuario, password });
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      const result = await login({
+        username: usuario,
+        password: password,
+      });
+
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrors({ 
+          general: result.error || 'Erro ao fazer login' 
+        });
+      }
+    } catch (error) {
+      setErrors({ 
+        general: 'Erro inesperado ao fazer login' 
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +84,7 @@ export const LoginPage = (): JSX.Element => {
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-4 pb-6">
             <div className="flex justify-center">
-              <img src="/logo.png" alt="Vika Zyntro" className="h-20 w-auto" />
+              <img src="/logo_zyntro.png" alt="Vika Zyntro" className="h-20 w-auto" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
               Bem vindo
@@ -137,11 +165,18 @@ export const LoginPage = (): JSX.Element => {
                 )}
               </div>
 
+              {errors.general && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{errors.general}</p>
+                </div>
+              )}
+
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white h-11 text-base font-semibold shadow-lg"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white h-11 text-base font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Entrar
+                {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
             </form>
           </CardContent>

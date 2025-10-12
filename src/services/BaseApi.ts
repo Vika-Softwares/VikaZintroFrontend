@@ -6,12 +6,25 @@ export class BaseApi {
   protected api: AxiosInstance;
 
   constructor() {
-    console.log("API URL:", apiUrl);
     this.api = axios.create({ baseURL: apiUrl });
+
+    this.api.interceptors.request.use((config) => {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
 
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
+        if (error?.response?.status === 401) {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+          window.location.href = '/login';
+        }
+
         const message =
           error?.response?.data?.message ||
           error?.response?.data?.error ||

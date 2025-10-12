@@ -28,7 +28,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     <header className="flex items-center justify-between pt-3 pb-[13px] px-10 bg-white border-b border-solid shadow-[0px_1px_2px_#0000000d] w-full">
       <div className="flex items-center gap-10">
         <div className="flex items-center gap-4">
-          <img src="/logo.png" alt="Vika Zyntro" className="w-8 h-8" />
+          <img src="/logo_zyntro.png" alt="Vika Zyntro" className="w-8 h-8" />
         </div>
 
         <NavigationTabs
