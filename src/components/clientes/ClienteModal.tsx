@@ -1,12 +1,5 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, IdCard } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Select } from "../ui/select";
-import { Modal } from "../ui/modal";
 import CustomerDto from "@/dto/customer.dto";
 import {
   formatCPF,
@@ -14,6 +7,13 @@ import {
   validateCPF,
   validatePhone,
 } from "@/utils/formatters";
+import { IdCard, Mail, MapPin, Phone, User } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Modal } from "../ui/modal";
+import { Select } from "../ui/select";
 
 interface ClienteModalProps {
   isOpen: boolean;
@@ -36,6 +36,7 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
     totalCompras: 0,
     dataUltimaCompra: "",
     cpfCnpj: "",
+    address: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,6 +51,7 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
         totalCompras: cliente.totalCompras,
         dataUltimaCompra: cliente.dataUltimaCompra || "",
         cpfCnpj: cliente.cpfCnpj || "",
+        address: cliente.address || "",
       });
     } else {
       setFormData({
@@ -60,6 +62,7 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
         totalCompras: 0,
         dataUltimaCompra: "",
         cpfCnpj: "",
+        address: "",
       });
     }
     setErrors({});
@@ -90,6 +93,14 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
       newErrors.phone = "Telefone inválido";
     }
 
+    if (
+      (formData.address.trim() && formData.address.length < 3) ||
+      formData.address.length > 255
+    ) {
+      newErrors.address =
+        "Endereço deve ter no mínimo 3 caracteres e no máximo 255 caracteres";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -104,16 +115,20 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
         phone: formData.phone,
         status: formData.status,
         totalCompras: formData.totalCompras,
-        categoria: "",
+        category: "",
         cpfCnpj: formData.cpfCnpj,
         idCustomers: "",
         idCompany: 0,
-        supplier: false,
+        isSupplier: false,
+        address: formData.address || "",
       });
     }
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (
+    field: keyof CustomerDto,
+    value: string | number
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -242,6 +257,30 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
             )}
           </div>
 
+          {/* Endereço */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="address"
+              className="text-sm font-medium text-gray-700"
+            >
+              Endereço
+            </Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="address"
+                type="text"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                className={`pl-10 ${errors.address ? "border-red-500" : ""}`}
+                placeholder="Rua x, numero x, bairro x, cidade x, estado x"
+              />
+            </div>
+            {errors.address && (
+              <p className="text-sm text-red-600">{errors.address}</p>
+            )}
+          </div>
+
           {/* Status */}
           <div className="space-y-2">
             <Label
@@ -310,7 +349,12 @@ export const ClienteModal: React.FC<ClienteModalProps> = ({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-          <Button data-testid="btn-cancelar-cliente" type="button" variant="outline" onClick={onClose}>
+          <Button
+            data-testid="btn-cancelar-cliente"
+            type="button"
+            variant="outline"
+            onClick={onClose}
+          >
             Cancelar
           </Button>
           <Button

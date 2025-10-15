@@ -1,33 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Users,
-  DollarSign,
-  TrendingUp,
-} from "lucide-react";
+import { ClienteModal } from "@/components/clientes/ClienteModal";
 import { TopBar } from "@/components/layout/TopBar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
   TablePagination,
+  TableRow,
 } from "@/components/ui/table";
-import { ClienteModal } from "@/components/clientes/ClienteModal";
-import { ClientesApi } from "@/services/ClientesApi";
-import CustomerDto from "@/dto/customer.dto";
 import { useToast } from "@/contexts/ToastContext";
+import CustomerDto from "@/dto/customer.dto";
+import { ClientesApi } from "@/services/ClientesApi";
+import { motion } from "framer-motion";
+import {
+  DollarSign,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const ClientesPage = (): JSX.Element => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,7 +60,6 @@ export const ClientesPage = (): JSX.Element => {
     };
     fetchClientes();
   }, [currentPage, itemsPerPage]);
-
 
   const filteredClientes = clientes.filter(
     (cliente) =>
@@ -116,17 +115,18 @@ export const ClientesPage = (): JSX.Element => {
 
   const handleSaveCliente = async (clienteData: CustomerDto) => {
     try {
+      const cliente = { ...clienteData } as any;
+      delete cliente.dataUltimaCompra;
+      delete cliente.totalCompras;
+      delete cliente.idCustomers;
       if (editingCliente) {
-        await clienteService.update(editingCliente.idCustomers, {
-          ...clienteData,
-          idCustomers: editingCliente.idCustomers,
-        });
+        await clienteService.update(editingCliente.idCustomers, cliente);
         toast.success(
           "Cliente atualizado",
           "Dados do cliente atualizados com sucesso!"
         );
       } else {
-        await clienteService.create(clienteData);
+        await clienteService.create(cliente);
         toast.success("Cliente criado", "Novo cliente criado com sucesso!");
       }
 
@@ -149,280 +149,275 @@ export const ClientesPage = (): JSX.Element => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <TopBar title="Clientes" />
 
-        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
-          >
-            <div className="flex flex-col gap-4">
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
-                  Clientes
-                </h1>
-                <p className="text-gray-500 mt-1">Gerencie seus clientes</p>
+      <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
+        >
+          <div className="flex flex-col gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                Clientes
+              </h1>
+              <p className="text-gray-500 mt-1">Gerencie seus clientes</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Clientes
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {totalClientes}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Clientes Ativos
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {clientes.filter((c) => c.status === "Ativo").length}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Receita Total
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(
+                      clientes.reduce((sum, c) => sum + c.totalCompras || 0, 0)
+                    )}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Ticket Médio
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(
+                      clientes.reduce(
+                        (sum, c) => sum + c.totalCompras || 0,
+                        0
+                      ) / clientes.length
+                    )}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Lista de Clientes
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Gerencie todos os seus clientes
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-initial">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      data-testid="input-busca-clientes"
+                      placeholder="Buscar clientes..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 w-full sm:w-64"
+                    />
+                  </div>
+
+                  <Button
+                    data-testid="btn-novo-cliente"
+                    onClick={handleNewCliente}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Cliente
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      Total Clientes
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {totalClientes}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      Clientes Ativos
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {clientes.filter((c) => c.status === "Ativo").length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      Receita Total
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(
-                        clientes.reduce(
-                          (sum, c) => sum + c.totalCompras || 0,
-                          0
-                        )
-                      )}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      Ticket Médio
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(
-                        clientes.reduce(
-                          (sum, c) => sum + c.totalCompras || 0,
-                          0
-                        ) / clientes.length
-                      )}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      Lista de Clientes
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Gerencie todos os seus clientes
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:flex-initial">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        data-testid="input-busca-clientes"
-                        placeholder="Buscar clientes..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-full sm:w-64"
-                      />
-                    </div>
-
-                    <Button
-                      data-testid="btn-novo-cliente"
-                      onClick={handleNewCliente}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+            <div className="overflow-x-auto">
+              <Table data-testid="tabela-clientes">
+                <TableHeader>
+                  <TableRow className="border-b border-gray-100">
+                    <TableHead className="font-semibold text-gray-700">
+                      Nome
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Email
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Telefone
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Status
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Total Compras
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Última Compra
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700 text-center">
+                      Ações
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredClientes.map((cliente, index) => (
+                    <motion.tr
+                      key={cliente.idCustomers}
+                      data-testid="linha-cliente"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Novo Cliente
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <Table data-testid="tabela-clientes">
-                  <TableHeader>
-                    <TableRow className="border-b border-gray-100">
-                      <TableHead className="font-semibold text-gray-700">
-                        Nome
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
-                        Email
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
-                        Telefone
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
-                        Status
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
-                        Total Compras
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700">
-                        Última Compra
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-center">
-                        Ações
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredClientes.map((cliente, index) => (
-                      <motion.tr
-                        key={cliente.idCustomers}
-                        data-testid="linha-cliente"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                      >
-                        <TableCell className="font-medium text-gray-900">
-                          {cliente.name}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {cliente.email}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {cliente.phone}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              cliente.status === "Ativo"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className={
-                              cliente.status === "Ativo"
-                                ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                            }
+                      <TableCell className="font-medium text-gray-900">
+                        {cliente.name}
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {cliente.email}
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {cliente.phone}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            cliente.status === "Ativo" ? "default" : "secondary"
+                          }
+                          className={
+                            cliente.status === "Ativo"
+                              ? "bg-green-100 text-green-800 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                          }
+                        >
+                          {cliente.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium text-gray-900">
+                        {formatCurrency(cliente.totalCompras)}
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {cliente.dataUltimaCompra
+                          ? formatDate(cliente.dataUltimaCompra)
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            data-testid="btn-editar-cliente"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditCliente(cliente)}
+                            className="w-8 h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           >
-                            {cliente.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium text-gray-900">
-                          {formatCurrency(cliente.totalCompras)}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {cliente.dataUltimaCompra
-                            ? formatDate(cliente.dataUltimaCompra)
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-2">
-                            <Button
-                              data-testid="btn-editar-cliente"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditCliente(cliente)}
-                              className="w-8 h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              data-testid="btn-excluir-cliente"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                handleDeleteCliente(cliente.idCustomers)
-                              }
-                              className="w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </motion.tr>
-                    ))}
-                  </TableBody>
-                </Table>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            data-testid="btn-excluir-cliente"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              handleDeleteCliente(cliente.idCustomers)
+                            }
+                            className="w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </TableBody>
+              </Table>
 
-                {filteredClientes.length === 0 && (
-                  <div className="text-center py-12">
-                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Nenhum cliente encontrado
-                    </h3>
-                    <p className="text-gray-500">
-                      {searchTerm
-                        ? "Tente ajustar sua busca"
-                        : "Comece adicionando seu primeiro cliente"}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <TablePagination
-                currentPage={currentPage}
-                totalPages={Math.ceil(totalClientes / itemsPerPage)}
-                totalItems={totalClientes}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={(newSize) => {
-                  setItemsPerPage(newSize);
-                  setCurrentPage(1);
-                }}
-              />
+              {filteredClientes.length === 0 && (
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Nenhum cliente encontrado
+                  </h3>
+                  <p className="text-gray-500">
+                    {searchTerm
+                      ? "Tente ajustar sua busca"
+                      : "Comece adicionando seu primeiro cliente"}
+                  </p>
+                </div>
+              )}
             </div>
-          </motion.div>
+
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalClientes / itemsPerPage)}
+              totalItems={totalClientes}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={(newSize) => {
+                setItemsPerPage(newSize);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        </motion.div>
       </main>
 
       <ClienteModal

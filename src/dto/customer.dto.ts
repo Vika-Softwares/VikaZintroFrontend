@@ -11,13 +11,14 @@ export default interface CustomerDto {
 
   status: "Ativo" | "Inativo";
 
-  categoria: string;
+  category: string;
 
   idCompany: number;
 
-  supplier: boolean;
+  isSupplier: boolean;
 
   totalCompras: number;
 
   dataUltimaCompra?: string;
+  address?: string;
 }
