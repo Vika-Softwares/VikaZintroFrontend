@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Sidebar } from './Sidebar';
-import { TopBar } from './TopBar';
+import { useState } from "react";
+import { Sidebar } from "./Sidebar";
+import { TopBar } from "./TopBar";
 
 interface PrivateLayoutProps {
   children: React.ReactNode;
 }
 
 export function PrivateLayout({ children }: PrivateLayoutProps) {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen">
-      <Sidebar 
+      <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         isOpen={sidebarOpen}
@@ -20,9 +20,7 @@ export function PrivateLayout({ children }: PrivateLayoutProps) {
       />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-auto bg-athens-gray p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
       </div>
     </div>
   );
