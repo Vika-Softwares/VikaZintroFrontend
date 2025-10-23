@@ -13,7 +13,7 @@ export const formatPercentage = (value: number): string => {
   return `${value}%`;
 };
 
-export const formatCPF = (value: string): string => {
+export const formatCPFCNPJ = (value: string): string => {
   const numbers = value.replace(/\D/g, "");
 
   if (numbers.length <= 11) {
@@ -38,6 +38,11 @@ export const formatPhone = (value: string): string => {
 
 export const validateCPF = (cpf: string): boolean => {
   const numbers = cpf.replace(/\D/g, "");
+  return numbers.length === 11 || numbers.length === 14;
+};
+
+export const validateCNPJ = (cnpj: string): boolean => {
+  const numbers = cnpj.replace(/\D/g, "");
   return numbers.length === 11 || numbers.length === 14;
 };
 

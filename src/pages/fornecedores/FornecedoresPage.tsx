@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -25,99 +25,48 @@ import {
 } from "@/components/ui/table";
 import { FornecedorModal } from "@/components/fornecedores/FornecedorModal";
 import { useToast } from "@/contexts/ToastContext";
-
-interface Fornecedor {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-  cnpj: string;
-  status: "Ativo" | "Inativo";
-  categoria: string;
-  dataUltimaCompra?: string;
-  totalCompras: number;
-}
-
-const mockFornecedores: Fornecedor[] = [
-  {
-    id: "1",
-    nome: "Tech Solutions Ltda",
-    email: "contato@techsolutions.com",
-    telefone: "(11) 3333-3333",
-    endereco: "São Paulo, SP",
-    cnpj: "12.345.678/0001-90",
-    status: "Ativo",
-    categoria: "Tecnologia",
-    dataUltimaCompra: "2024-01-12",
-    totalCompras: 45200.0,
-  },
-  {
-    id: "2",
-    nome: "Materiais & Cia",
-    email: "vendas@materiaisecia.com",
-    telefone: "(11) 4444-4444",
-    endereco: "Campinas, SP",
-    cnpj: "98.765.432/0001-10",
-    status: "Ativo",
-    categoria: "Materiais",
-    dataUltimaCompra: "2024-01-08",
-    totalCompras: 28750.5,
-  },
-  {
-    id: "3",
-    nome: "Serviços Gerais S.A.",
-    email: "admin@servicosgerais.com",
-    telefone: "(11) 5555-5555",
-    endereco: "Santos, SP",
-    cnpj: "11.222.333/0001-44",
-    status: "Inativo",
-    categoria: "Serviços",
-    dataUltimaCompra: "2023-11-15",
-    totalCompras: 12300.0,
-  },
-  {
-    id: "4",
-    nome: "Logística Express",
-    email: "contato@logisticaexpress.com",
-    telefone: "(11) 6666-6666",
-    endereco: "Guarulhos, SP",
-    cnpj: "44.555.666/0001-77",
-    status: "Ativo",
-    categoria: "Logística",
-    dataUltimaCompra: "2024-01-10",
-    totalCompras: 18900.25,
-  },
-];
+import CustomerDto from "@/dto/customer.dto";
+import { FornecedoresApi } from "@/services/FornecedoresApi";
 
 export const FornecedoresPage = (): JSX.Element => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [fornecedores, setFornecedores] =
-    useState<Fornecedor[]>(mockFornecedores);
+  const [fornecedores, setFornecedores] = useState<CustomerDto[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingFornecedor, setEditingFornecedor] = useState<Fornecedor | null>(
-    null
-  );
+  const [editingFornecedor, setEditingFornecedor] =
+    useState<CustomerDto | null>(null);
+  const [totalFornecedores, setTotalFornecedores] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const fornecedorService = new FornecedoresApi();
   const toast = useToast();
+
+  useEffect(() => {
+    const fetchFornecedores = async () => {
+      try {
+        const data = await fornecedorService.getAll({
+          page: currentPage,
+          limit: itemsPerPage,
+        });
+        setTotalFornecedores(data.total);
+        setFornecedores(data.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Erro", "Não foi possível carregar os fornecedores.");
+      }
+    };
+    fetchFornecedores();
+  }, [currentPage, itemsPerPage]);
 
   const filteredFornecedores = fornecedores.filter(
     (fornecedor) =>
-      fornecedor.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fornecedor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fornecedor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fornecedor.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+      (fornecedor.category &&
+        fornecedor.category.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const totalFiltered = filteredFornecedores.length;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedFornecedores = filteredFornecedores.slice(
-    startIndex,
-    endIndex
-  );
-
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
@@ -133,6 +82,7 @@ export const FornecedoresPage = (): JSX.Element => {
   };
 
   const formatCNPJ = (cnpj: string) => {
+    if (!cnpj) return "";
     return cnpj.replace(
       /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
       "$1.$2.$3/$4-$5"
@@ -144,7 +94,7 @@ export const FornecedoresPage = (): JSX.Element => {
     setIsModalOpen(true);
   };
 
-  const handleEditFornecedor = (fornecedor: Fornecedor) => {
+  const handleEditFornecedor = (fornecedor: CustomerDto) => {
     setEditingFornecedor(fornecedor);
     setIsModalOpen(true);
   };
@@ -160,34 +110,65 @@ export const FornecedoresPage = (): JSX.Element => {
     });
 
     if (confirmed) {
-      setFornecedores(fornecedores.filter((f) => f.id !== id));
-      toast.success("Fornecedor excluído", "Fornecedor excluído com sucesso!");
+      try {
+        await fornecedorService.deleteFornecedor(id);
+        setFornecedores(fornecedores.filter((f) => f.idCustomers !== id));
+        toast.success(
+          "Fornecedor excluído",
+          "Fornecedor excluído com sucesso!"
+        );
+      } catch (error) {
+        toast.error(
+          "Erro ao excluir",
+          "Não foi possível excluir o fornecedor."
+        );
+      }
     }
   };
 
-  const handleSaveFornecedor = (fornecedorData: Omit<Fornecedor, "id">) => {
-    if (editingFornecedor) {
-      setFornecedores(
-        fornecedores.map((f) =>
-          f.id === editingFornecedor.id
-            ? { ...fornecedorData, id: editingFornecedor.id }
-            : f
-        )
-      );
-      toast.success(
-        "Fornecedor atualizado",
-        "Dados do fornecedor atualizados com sucesso!"
-      );
-    } else {
-      const newFornecedor: Fornecedor = {
-        ...fornecedorData,
-        id: Date.now().toString(),
+  const handleSaveFornecedor = async (fornecedorData: any) => {
+    try {
+      const fornecedor = {
+        name: fornecedorData.nome,
+        email: fornecedorData.email,
+        phone: fornecedorData.telefone,
+        address: fornecedorData.endereco || "",
+        cpfCnpj: fornecedorData.cnpj,
+        status: fornecedorData.status,
+        category: fornecedorData.categoria || "",
+        idCompany: 1,
+        isSupplier: true,
       };
-      setFornecedores([...fornecedores, newFornecedor]);
-      toast.success("Fornecedor criado", "Novo fornecedor criado com sucesso!");
+
+      if (editingFornecedor) {
+        await fornecedorService.update(
+          editingFornecedor.idCustomers,
+          fornecedor
+        );
+        toast.success(
+          "Fornecedor atualizado",
+          "Dados do fornecedor atualizados com sucesso!"
+        );
+      } else {
+        await fornecedorService.create(fornecedor);
+        toast.success(
+          "Fornecedor criado",
+          "Novo fornecedor criado com sucesso!"
+        );
+      }
+
+      const data = await fornecedorService.getAll({
+        page: currentPage,
+        limit: itemsPerPage,
+      });
+      setTotalFornecedores(data.total);
+      setFornecedores(data.data);
+
+      setIsModalOpen(false);
+      setEditingFornecedor(null);
+    } catch (error) {
+      toast.error("Erro ao salvar", "Não foi possível salvar o fornecedor.");
     }
-    setIsModalOpen(false);
-    setEditingFornecedor(null);
   };
 
   return (
@@ -362,29 +343,29 @@ export const FornecedoresPage = (): JSX.Element => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedFornecedores.map((fornecedor, index) => (
+              {filteredFornecedores.map((fornecedor, index) => (
                 <motion.tr
-                  key={fornecedor.id}
+                  key={fornecedor.idCustomers}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                 >
                   <TableCell className="font-medium text-gray-900">
-                    {fornecedor.nome}
+                    {fornecedor.name}
                   </TableCell>
                   <TableCell className="text-gray-600">
                     {fornecedor.email}
                   </TableCell>
                   <TableCell className="text-gray-600">
-                    {fornecedor.telefone}
+                    {fornecedor.phone}
                   </TableCell>
                   <TableCell className="text-gray-600 font-mono text-sm">
-                    {formatCNPJ(fornecedor.cnpj)}
+                    {formatCNPJ(fornecedor.cpfCnpj)}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
-                      {fornecedor.categoria}
+                      {fornecedor.category || "-"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -402,7 +383,7 @@ export const FornecedoresPage = (): JSX.Element => {
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium text-gray-900">
-                    {formatCurrency(fornecedor.totalCompras)}
+                    {formatCurrency(fornecedor.totalCompras || 0)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-2">
@@ -417,7 +398,9 @@ export const FornecedoresPage = (): JSX.Element => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteFornecedor(fornecedor.id)}
+                        onClick={() =>
+                          handleDeleteFornecedor(fornecedor.idCustomers)
+                        }
                         className="w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -446,8 +429,8 @@ export const FornecedoresPage = (): JSX.Element => {
 
         <TablePagination
           currentPage={currentPage}
-          totalPages={Math.ceil(totalFiltered / itemsPerPage)}
-          totalItems={totalFiltered}
+          totalPages={Math.ceil(totalFornecedores / itemsPerPage)}
+          totalItems={totalFornecedores}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
           onItemsPerPageChange={(newSize) => {
@@ -465,7 +448,22 @@ export const FornecedoresPage = (): JSX.Element => {
           setEditingFornecedor(null);
         }}
         onSave={handleSaveFornecedor}
-        fornecedor={editingFornecedor}
+        fornecedor={
+          editingFornecedor
+            ? {
+                id: editingFornecedor.idCustomers,
+                nome: editingFornecedor.name,
+                email: editingFornecedor.email,
+                telefone: editingFornecedor.phone,
+                endereco: editingFornecedor.address || "",
+                cnpj: editingFornecedor.cpfCnpj,
+                status: editingFornecedor.status,
+                categoria: editingFornecedor.category || "",
+                totalCompras: editingFornecedor.totalCompras || 0,
+                dataUltimaCompra: editingFornecedor.dataUltimaCompra,
+              }
+            : null
+        }
       />
     </motion.div>
   );
